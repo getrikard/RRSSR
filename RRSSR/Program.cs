@@ -14,7 +14,7 @@ namespace RRSSR
         private static int _paddingLeft = 4;
 
         private static readonly ConsoleColor bgColor = ConsoleColor.Black;
-        private static readonly ConsoleColor fgColor = ConsoleColor.Green;
+        private static readonly ConsoleColor fgColor = ConsoleColor.White;
 
         static void Main(string[] args)
         {
