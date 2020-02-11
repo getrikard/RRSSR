@@ -10,18 +10,29 @@ namespace RRSSR
 {
     class Program
     {
+        private static int _paddingTop = 1;
+        private static int _paddingLeft = 4;
+
+        private static readonly ConsoleColor bgColor = ConsoleColor.Black;
+        private static readonly ConsoleColor fgColor = ConsoleColor.Green;
+
         static void Main(string[] args)
         {
-            var items = GetRssItems("https://www.nrk.no/urix/toppsaker.rss", 20);
+            var items = GetRssItems("https://www.nrk.no/urix/toppsaker.rss", 15);
             var selected = 0;
             ConsoleKey keyPressed;
             Console.CursorVisible = false;
             bool doPrintMenu = true;
 
+            Console.BackgroundColor = bgColor;
+            Console.ForegroundColor = fgColor;
+            Console.Clear();
+
             while (true)
             {
                 if (doPrintMenu) PrintMenu(items, selected);
-                keyPressed = Console.ReadKey().Key;
+                keyPressed = Console.ReadKey(true).Key;
+                var item = items[selected];
 
                 switch (keyPressed)
                 {
@@ -42,10 +53,15 @@ namespace RRSSR
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.Enter:
-                        PrintItem(items[selected]);
+                        PrintItem(item);
                         doPrintMenu = true;
                         break;
+                    case ConsoleKey.O:
+                        System.Diagnostics.Process.Start(item.Link);
+                        doPrintMenu = false;
+                        break;
                     case ConsoleKey.Escape:
+                    case ConsoleKey.Q:
                         Environment.Exit(0);
                         break;
                     default:
@@ -57,37 +73,46 @@ namespace RRSSR
 
         private static void PrintMenu(RssItem[] items, int selected)
         {
-            int top = 1;
-            int left = 4;
+            int localTop = _paddingTop;
             Console.Clear();
 
             for (int i = 0; i < items.Length; i++)
             {
                 if (i == selected)
                 {
-                    Console.BackgroundColor = ConsoleColor.White;
-                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.BackgroundColor = fgColor;
+                    Console.ForegroundColor = bgColor;
                 }
 
-                Console.SetCursorPosition(left, top);
+                Console.SetCursorPosition(_paddingLeft, localTop);
                 Console.Write(items[i].Title);
-                top++;
+                localTop++;
 
                 if (i == selected)
                 {
-                    Console.BackgroundColor = ConsoleColor.Black;
-                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.BackgroundColor = bgColor;
+                    Console.ForegroundColor = fgColor;
                 }
             }
         }
 
         private static void PrintItem(RssItem item)
         {
-            int top = 1;
-            int left = 4;
             Console.Clear();
-            PrintAtPosition(left, top, item.Summary);
-            Console.ReadKey();
+            PrintAtPosition(_paddingLeft, _paddingTop, item.Summary);
+            ConsoleKey keyPressed;
+            while (true)
+            {
+                keyPressed = Console.ReadKey(true).Key;
+                switch (keyPressed)
+                {
+                    case ConsoleKey.O:
+                        System.Diagnostics.Process.Start(item.Link);
+                        break;
+                    default:
+                        return;
+                }
+            }
         }
 
         private static int PrintAtPosition(int left, int top, string s)
@@ -122,7 +147,7 @@ namespace RRSSR
         {
             var feed = GetSyndicationFeed(url);
             return feed.Items
-                .Select(item => new RssItem(item.Title.Text, item.Summary.Text))
+                .Select(item => new RssItem(item.Title.Text, item.Summary.Text, item.Links[0].Uri.ToString()))
                 .Take(amount)
                 .ToArray();
         }

@@ -4,11 +4,13 @@
     {
         public string Title { get; }
         public string Summary { get; }
+        public string Link { get; }
 
-        public RssItem(string title, string summary)
+        public RssItem(string title, string summary, string link)
         {
             Title = title;
-            Summary = summary == "" ? null : summary;
+            Summary = summary == "" ? "<No summary>" : summary;
+            Link = link;
         }
     }
 }
