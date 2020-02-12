@@ -9,7 +9,7 @@
         public RssItem(string title, string summary, string link)
         {
             Title = title;
-            Summary = summary == "" ? "<No summary>" : summary;
+            Summary = string.IsNullOrEmpty(summary) ? "<No summary>" : summary;
             Link = link;
         }
     }

@@ -3,66 +3,145 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.ServiceModel.Syndication;
+using System.Xml;
 
 namespace RRSSR
 {
     class Program
     {
-        private static int _paddingTop = 1;
-        private static int _paddingLeft = 4;
-
-        private static readonly ConsoleColor bgColor = ConsoleColor.Black;
-        private static readonly ConsoleColor fgColor = ConsoleColor.White;
-
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            var items = GetRssItems("https://www.nrk.no/urix/toppsaker.rss", 15);
+            var settingsFilename = "rrssr.conf";
+
+            if (args.Length > 0 && args[0].Trim() == "create_config")
+            {
+                Settings.CreateFile(settingsFilename);
+                Environment.Exit(0);
+            }
+
+            if (args.Length > 1) settingsFilename = args[1];
+            var errorAtLineNumber = Settings.ReadFile(settingsFilename);
+
+            // errorAtLineNumber = 0 betyr at alt er bra.
+            if (errorAtLineNumber > 0)
+            {
+                Console.WriteLine($"ERROR: Could not parse settings file: \"{settingsFilename}\", at line {errorAtLineNumber}.");
+                return;
+            }
+
+            Console.BackgroundColor = Settings.BgColor;
+            Console.ForegroundColor = Settings.FgColor;
+            Console.Clear();
+
+            if (Settings.Urls.Count == 0)
+            {
+                if (args.Length < 1)
+                {
+                    Usage();
+                    Environment.Exit(0);
+                }
+                Settings.Urls.Add(args[0]);
+            }
+
+            // Setup
+            Console.Clear();
+            var selectedFeed = 0;
+            var feed = GetRssItems(Settings.Urls[selectedFeed], Settings.ItemsToGet);
             var selected = 0;
             ConsoleKey keyPressed;
             Console.CursorVisible = false;
+            RssItem item;
+
+            int refreshFrom = 0;
+            int refreshTo = feed.Items.Length;
+            bool doClearMenu = true;
             bool doPrintMenu = true;
 
-            Console.BackgroundColor = bgColor;
-            Console.ForegroundColor = fgColor;
-            Console.Clear();
-
+            // Main loop
             while (true)
             {
-                if (doPrintMenu) PrintMenu(items, selected);
+                if (doPrintMenu)
+                {
+                    PrintMenu(feed, selected, refreshFrom, refreshTo, doClearMenu);
+                }
                 keyPressed = Console.ReadKey(true).Key;
-                var item = items[selected];
+                item = feed.Items[selected];
 
                 switch (keyPressed)
                 {
                     case ConsoleKey.DownArrow:
-                        selected = selected + 1 < items.Length ? selected + 1 : items.Length - 1;
+                    case ConsoleKey.PageDown:
+                    case ConsoleKey.J:
+                        refreshFrom = selected;
+                        selected = selected + 1 < feed.Items.Length ? selected + 1 : feed.Items.Length - 1;
+                        refreshTo = selected + 1;
+                        doClearMenu = false;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.UpArrow:
+                    case ConsoleKey.PageUp:
+                    case ConsoleKey.K:
+                        refreshTo = selected + 1;
                         selected = selected - 1 >= 0 ? selected - 1 : 0;
+                        refreshFrom = selected;
+                        doClearMenu = false;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.Home:
+                        refreshFrom = 0;
+                        refreshTo = feed.Items.Length;
                         selected = 0;
+                        doClearMenu = false;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.End:
-                        selected = items.Length - 1;
+                        refreshFrom = 0;
+                        refreshTo = feed.Items.Length;
+                        selected = feed.Items.Length - 1;
+                        doClearMenu = false;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.Enter:
                         PrintItem(item);
+                        refreshFrom = 0;
+                        refreshTo = feed.Items.Length;
+                        doClearMenu = true;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.O:
                         System.Diagnostics.Process.Start(item.Link);
                         doPrintMenu = false;
                         break;
+                    case ConsoleKey.R:
+                        if (Settings.ReadFile(settingsFilename) > 0) break;
+                        feed = GetRssItems(Settings.Urls[selectedFeed], Settings.ItemsToGet);
+                        refreshFrom = 0;
+                        refreshTo = feed.Items.Length;
+                        doClearMenu = true;
+                        doPrintMenu = true;
+                        Console.CursorVisible = false;
+                        break;
+                    case ConsoleKey.OemPeriod:
+                        selectedFeed = (selectedFeed + 1) % Settings.Urls.Count;
+                        feed = GetRssItems(Settings.Urls[selectedFeed], Settings.ItemsToGet);
+                        refreshFrom = 0;
+                        refreshTo = feed.Items.Length;
+                        doClearMenu = true;
+                        doPrintMenu = true;
+                        break;
+                    case ConsoleKey.OemComma:
+                        selectedFeed = (selectedFeed + Settings.Urls.Count - 1) % Settings.Urls.Count;
+                        feed = GetRssItems(Settings.Urls[selectedFeed], Settings.ItemsToGet);
+                        refreshFrom = 0;
+                        refreshTo = feed.Items.Length;
+                        doClearMenu = true;
+                        doPrintMenu = true;
+                        break;
                     case ConsoleKey.Escape:
                     case ConsoleKey.Q:
-                        Environment.Exit(0);
+                        Exit(0);
                         break;
                     default:
                         doPrintMenu = false;
@@ -71,27 +150,45 @@ namespace RRSSR
             }
         }
 
-        private static void PrintMenu(RssItem[] items, int selected)
+        private static void Usage()
         {
-            int localTop = _paddingTop;
-            Console.Clear();
+            Console.WriteLine("Usage:\n");
+            Console.WriteLine("    RRSSR.exe <rss_url>");
+            Console.WriteLine("    RRSSR.exe create_config");
+        }
 
-            for (int i = 0; i < items.Length; i++)
+        private static void Exit(int exitCode)
+        {
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Clear();
+            Environment.Exit(exitCode);
+        }
+
+        private static void PrintMenu(RssFeed feed, int selected, int from = 0, int to = Int32.MaxValue, bool doClear = true)
+        {
+            RssItem[] items = feed.Items;
+            int localTop = Settings.PaddingTop + from + 2;
+            if (doClear) Console.Clear();
+
+            PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop, feed.Title);
+
+            for (int i = from; i < items.Length && i < to; i++)
             {
                 if (i == selected)
                 {
-                    Console.BackgroundColor = fgColor;
-                    Console.ForegroundColor = bgColor;
+                    Console.BackgroundColor = Settings.FgColor;
+                    Console.ForegroundColor = Settings.BgColor;
                 }
 
-                Console.SetCursorPosition(_paddingLeft, localTop);
+                Console.SetCursorPosition(Settings.PaddingLeft, localTop);
                 Console.Write(items[i].Title);
                 localTop++;
 
                 if (i == selected)
                 {
-                    Console.BackgroundColor = bgColor;
-                    Console.ForegroundColor = fgColor;
+                    Console.BackgroundColor = Settings.BgColor;
+                    Console.ForegroundColor = Settings.FgColor;
                 }
             }
         }
@@ -99,7 +196,7 @@ namespace RRSSR
         private static void PrintItem(RssItem item)
         {
             Console.Clear();
-            PrintAtPosition(_paddingLeft, _paddingTop, item.Summary);
+            PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop, item.Summary);
             ConsoleKey keyPressed;
             while (true)
             {
@@ -143,21 +240,61 @@ namespace RRSSR
             return lines;
         }
 
-        private static RssItem[] GetRssItems(string url, int amount)
+        private static void DrawBorder()
         {
-            var feed = GetSyndicationFeed(url);
-            return feed.Items
-                .Select(item => new RssItem(item.Title.Text, item.Summary.Text, item.Links[0].Uri.ToString()))
-                .Take(amount)
-                .ToArray();
+            int w = Console.WindowWidth;
+            int h = Console.WindowHeight;
+
+            Console.BackgroundColor = Settings.FgColor;
+
+            for (int left = 0; left < w; left++)
+            {
+                Console.SetCursorPosition(left, 0);
+                Console.Write(' ');
+                Console.SetCursorPosition(left, h - 1);
+                Console.Write(' ');
+            }
+
+            for (int top = 0; top < h; top++)
+            {
+                Console.SetCursorPosition(0, top);
+                Console.Write("  ");
+                Console.SetCursorPosition(w - 2, top);
+                Console.Write("  ");
+            }
+
+            Console.SetCursorPosition(0, 0);
+            Console.BackgroundColor = Settings.BgColor;
         }
 
-        private static SyndicationFeed GetSyndicationFeed(string url)
+        private static RssFeed GetRssItems(string url, int amount)
         {
+            Console.Clear();
+            PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop,
+                "Henter RSS fra: " + url + " ...");
+
+            SyndicationFeed feed;
             using (var reader = XmlReader.Create(url))
             {
-                return SyndicationFeed.Load(reader);
+                feed = SyndicationFeed.Load(reader);
             }
+
+            var items = feed.Items
+                .Select(item =>
+                {
+                    string title = null;
+                    if (item.Title != null) title = item.Title.Text.Trim();
+
+                    string summary = null;
+                    if (item.Summary != null) summary = item.Summary.Text.Trim();
+
+                    string link = null;
+                    if (item.Links.Count != 0) link = item.Links[0].Uri.ToString();
+                    return new RssItem(title, summary, link);
+                })
+                .Take(amount)
+                .ToArray();
+            return new RssFeed(feed.Title.Text, items);
         }
     }
 }
