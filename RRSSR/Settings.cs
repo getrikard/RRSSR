@@ -75,7 +75,7 @@ namespace RRSSR
             File.WriteAllText(filename, ToString());
         }
 
-        internal static string ToString()
+        internal new static string ToString()
         {
             string txt = "";
             foreach (var url in Urls)

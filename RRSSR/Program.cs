@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.ServiceModel.Syndication;
 using System.Xml;
 
@@ -39,16 +38,37 @@ namespace RRSSR
             {
                 if (args.Length < 1)
                 {
-                    Usage();
-                    Environment.Exit(0);
+                    //Usage();
+                    //Environment.Exit(0);
+                    Console.SetCursorPosition(Settings.PaddingLeft, Settings.PaddingTop);
+                    Console.CursorVisible = true;
+                    Console.Write("RSS URL > ");
+                    var url = Console.ReadLine();
+                    Settings.Urls.Add(url);
+                    Console.CursorVisible = false;
+
                 }
-                Settings.Urls.Add(args[0]);
+
+                foreach (var arg in args)
+                {
+                    Settings.Urls.Add(arg);
+                }
             }
 
             // Setup
             Console.Clear();
             var selectedFeed = 0;
-            var feed = GetRssItems(Settings.Urls[selectedFeed], Settings.ItemsToGet);
+            RssFeed feed = null;
+            try
+            {
+                feed = GetRssItems(Settings.Urls[selectedFeed], Settings.ItemsToGet);
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                Console.WriteLine($"ERROR: Could not get RSS feed from URL: {Settings.Urls[selectedFeed]}");
+                Exit(1);
+            }
+            
             var selected = 0;
             ConsoleKey keyPressed;
             Console.CursorVisible = false;
@@ -214,20 +234,20 @@ namespace RRSSR
 
         private static int PrintAtPosition(int left, int top, string s)
         {
-            int lines = 1;
-            int windowWidth = Console.WindowWidth;
-            int lineLength = windowWidth - left * 2;
+            var lines = 1;
+            var windowWidth = Console.WindowWidth;
+            var lineLength = windowWidth - left * 2;
 
             var buffer = new List<string>();
-            if (s.Length > lineLength)
+
+            // Stjålet fra StackOverflow
+            var offset = 0;
+            while (offset < s.Length)
             {
-                buffer.Add(s.Substring(0, lineLength));
-                buffer.Add(s.Substring(lineLength));
+                int size = Math.Min(lineLength, s.Length - offset);
+                buffer.Add(s.Substring(offset, size));
+                offset += size;
                 lines++;
-            }
-            else
-            {
-                buffer.Add(s);
             }
 
             foreach (var line in buffer)
