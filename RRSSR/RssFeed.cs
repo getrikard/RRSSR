@@ -8,8 +8,8 @@
 
         public RssFeed(string title, string description, RssItem[] items)
         {
-            Title = title;
-            Description = string.IsNullOrEmpty(description) ? "<No title>" : description;
+            Title = string.IsNullOrEmpty(title) ? "<No title>" : title;
+            Description = description;
             Items = items;
         }
     }
