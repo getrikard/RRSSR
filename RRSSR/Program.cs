@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel.Syndication;
+using System.Text;
 using System.Xml;
 
 namespace RRSSR
@@ -33,6 +34,7 @@ namespace RRSSR
             Console.Title = "RRSSR";
             Console.BackgroundColor = Settings.BgColor;
             Console.ForegroundColor = Settings.FgColor;
+            Console.OutputEncoding = Encoding.UTF8;
             Console.Clear();
 
             if (Settings.Urls.Count == 0)
