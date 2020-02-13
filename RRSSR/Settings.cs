@@ -18,7 +18,8 @@ namespace RRSSR
         {
             var lineNumber = 0;
 
-            if (!File.Exists(filename)) return lineNumber;
+            if (!File.Exists(filename)) return 0;
+            Urls = new List<string>();
 
             var lines = File.ReadAllLines(filename);
             foreach (var line in lines)

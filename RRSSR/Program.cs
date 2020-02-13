@@ -30,6 +30,7 @@ namespace RRSSR
                 return;
             }
 
+            Console.Title = "RRSSR";
             Console.BackgroundColor = Settings.BgColor;
             Console.ForegroundColor = Settings.FgColor;
             Console.Clear();
@@ -191,7 +192,11 @@ namespace RRSSR
             int localTop = Settings.PaddingTop + from + 2;
             if (doClear) Console.Clear();
 
-            PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop, feed.Title);
+            var headerText = feed.Title;
+            if (!string.IsNullOrEmpty(feed.Description))
+                headerText += " (" + feed.Description + ")";
+
+            PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop, headerText.Trim());
 
             for (int i = from; i < items.Length && i < to; i++)
             {
@@ -316,8 +321,9 @@ namespace RRSSR
                 .ToArray();
 
             var feedTitle = feed.Title != null ? feed.Title.Text : "";
+            var feedDescription = feed.Description != null ? feed.Description.Text : "";
 
-            return new RssFeed(feedTitle, items);
+            return new RssFeed(feedTitle, feedDescription, items);
         }
     }
 }
