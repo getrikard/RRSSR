@@ -127,6 +127,7 @@ namespace RRSSR
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.Enter:
+                    case ConsoleKey.RightArrow:
                         PrintItem(item);
                         refreshFrom = 0;
                         refreshTo = feed.Items.Length;
@@ -233,38 +234,49 @@ namespace RRSSR
                     case ConsoleKey.O:
                         System.Diagnostics.Process.Start(item.Link);
                         break;
-                    default:
+                    case ConsoleKey.LeftArrow:
+                    case ConsoleKey.Escape:
+                    case ConsoleKey.Q:
+                    case ConsoleKey.Backspace:
+                    case ConsoleKey.BrowserBack:
                         return;
                 }
             }
         }
 
-        private static int PrintAtPosition(int left, int top, string s)
+        private static void PrintAtPosition(int left, int top, string s)
         {
-            var lines = 1;
             var windowWidth = Console.WindowWidth;
             var lineLength = windowWidth - left * 2;
+            var textLines = s.Split('\n');
 
             var buffer = new List<string>();
 
-            // Stjålet fra StackOverflow
-            var offset = 0;
-            while (offset < s.Length)
+            foreach (var textLine in textLines)
             {
-                int size = Math.Min(lineLength, s.Length - offset);
-                buffer.Add(s.Substring(offset, size));
-                offset += size;
-                lines++;
+                SplitStringOnLinelength(textLine + "\n", lineLength, ref buffer);
             }
 
             foreach (var line in buffer)
             {
                 Console.SetCursorPosition(left, top);
                 Console.Write(line);
+                if (line[line.Length - 1] == '\n') top++;
                 top++;
             }
+        }
 
-            return lines;
+        // Stjålet fra StackOverflow
+        private static void SplitStringOnLinelength(string s, int lineLength, ref List<string> buffer)
+        {
+            //var buffer = new List<string>();
+            var offset = 0;
+            while (offset < s.Length)
+            {
+                int size = Math.Min(lineLength, s.Length - offset);
+                buffer.Add(s.Substring(offset, size));
+                offset += size;
+            }
         }
 
         private static void DrawBorder()
