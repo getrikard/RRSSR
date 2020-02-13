@@ -314,7 +314,10 @@ namespace RRSSR
                 })
                 .Take(amount)
                 .ToArray();
-            return new RssFeed(feed.Title.Text, items);
+
+            var feedTitle = feed.Title != null ? feed.Title.Text : "";
+
+            return new RssFeed(feedTitle, items);
         }
     }
 }

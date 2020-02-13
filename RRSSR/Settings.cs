@@ -45,10 +45,10 @@ namespace RRSSR
                             PaddingLeft = Convert.ToInt32(settingLine[1]);
                             break;
                         case "fg_color":
-                            FgColor = StringToConsoleColor(settingLine[1]);
+                            FgColor = StringToConsoleColor(settingLine[1].ToLower());
                             break;
                         case "bg_color":
-                            BgColor = StringToConsoleColor(settingLine[1]);
+                            BgColor = StringToConsoleColor(settingLine[1].ToLower());
                             break;
                         case "fetch_amount":
                             ItemsToGet = Convert.ToInt32(settingLine[1]);
@@ -84,8 +84,8 @@ namespace RRSSR
             }
             txt += $"padding_top = {PaddingTop}\n";
             txt += $"padding_sides = {PaddingLeft}\n";
-            txt += $"fg_color = {FgColor.ToString()}\n";
-            txt += $"bg_color = {BgColor.ToString()}\n";
+            txt += $"fg_color = {FgColor.ToString().ToLower()}\n";
+            txt += $"bg_color = {BgColor.ToString().ToLower()}\n";
             txt += $"fetch_amount = {ItemsToGet}\n";
             return txt;
         }
