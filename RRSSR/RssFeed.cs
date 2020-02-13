@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-namespace RRSSR
+﻿namespace RRSSR
 {
     internal class RssFeed
     {
@@ -11,7 +9,7 @@ namespace RRSSR
         public RssFeed(string title, string description, RssItem[] items)
         {
             Title = title;
-            Description = description;
+            Description = string.IsNullOrEmpty(description) ? "<No title>" : description;
             Items = items;
         }
     }
