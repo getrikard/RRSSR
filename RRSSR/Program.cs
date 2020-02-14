@@ -201,7 +201,7 @@ namespace RRSSR
             if (!string.IsNullOrEmpty(feed.Description))
             {
                 localTop--;
-                localTop += PrintAtPosition(Settings.PaddingLeft, localTop, feed.Description.Trim());
+                localTop += PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop+1, feed.Description.Trim());
                 localTop += 2;
             }
 
