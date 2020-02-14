@@ -199,7 +199,8 @@ namespace RRSSR
             if (!string.IsNullOrEmpty(feed.Description))
                 headerText += " (" + feed.Description + ")";
 
-            PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop, headerText.Trim());
+            var linesUsedForHeader = PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop, headerText.Trim());
+            localTop += linesUsedForHeader;
 
             for (int i = from; i < items.Length && i < to; i++)
             {
@@ -244,8 +245,9 @@ namespace RRSSR
             }
         }
 
-        private static void PrintAtPosition(int left, int top, string s)
+        private static int PrintAtPosition(int left, int top, string s)
         {
+            var linesUsed = 0;
             var windowWidth = Console.WindowWidth;
             var lineLength = windowWidth - left * 2;
             var textLines = s.Split('\n');
@@ -263,7 +265,10 @@ namespace RRSSR
                 Console.Write(line);
                 if (line[line.Length - 1] == '\n') top++;
                 top++;
+                linesUsed++;
             }
+
+            return linesUsed-1;
         }
 
         // Stjålet fra StackOverflow
