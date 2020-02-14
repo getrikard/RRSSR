@@ -71,7 +71,7 @@ namespace RRSSR
                 Console.WriteLine($"ERROR: Could not get RSS feed from URL: {Settings.Urls[selectedFeed]}");
                 Exit(1);
             }
-            
+
             var selected = 0;
             ConsoleKey keyPressed;
             Console.CursorVisible = false;
@@ -196,11 +196,15 @@ namespace RRSSR
             if (doClear) Console.Clear();
 
             var headerText = feed.Title;
-            if (!string.IsNullOrEmpty(feed.Description))
-                headerText += " (" + feed.Description + ")";
+            localTop += PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop, headerText.Trim());
 
-            var linesUsedForHeader = PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop, headerText.Trim());
-            localTop += linesUsedForHeader;
+            if (!string.IsNullOrEmpty(feed.Description))
+            {
+                localTop--;
+                localTop += PrintAtPosition(Settings.PaddingLeft, localTop, feed.Description.Trim());
+                localTop += 2;
+            }
+
 
             for (int i = from; i < items.Length && i < to; i++)
             {
@@ -268,13 +272,12 @@ namespace RRSSR
                 linesUsed++;
             }
 
-            return linesUsed-1;
+            return linesUsed - 1;
         }
 
         // Stjålet fra StackOverflow
         private static void SplitStringOnLinelength(string s, int lineLength, ref List<string> buffer)
         {
-            //var buffer = new List<string>();
             var offset = 0;
             while (offset < s.Length)
             {
