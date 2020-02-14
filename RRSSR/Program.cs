@@ -192,7 +192,7 @@ namespace RRSSR
         private static void PrintMenu(RssFeed feed, int selected, int from = 0, int to = Int32.MaxValue, bool doClear = true)
         {
             RssItem[] items = feed.Items;
-            int localTop = Settings.PaddingTop + from + 2;
+            int localTop = Settings.PaddingTop + from + 1;
             if (doClear) Console.Clear();
 
             var headerText = feed.Title;
@@ -200,9 +200,7 @@ namespace RRSSR
 
             if (!string.IsNullOrEmpty(feed.Description))
             {
-                localTop--;
-                localTop += PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop+1, feed.Description.Trim());
-                localTop += 2;
+                localTop += PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop + 1, feed.Description.Trim());
             }
 
 
@@ -214,9 +212,7 @@ namespace RRSSR
                     Console.ForegroundColor = Settings.BgColor;
                 }
 
-                Console.SetCursorPosition(Settings.PaddingLeft, localTop);
-                Console.Write(items[i].Title);
-                localTop++;
+                localTop += PrintAtPosition(Settings.PaddingLeft, localTop, items[i].Title);
 
                 if (i == selected)
                 {
@@ -272,7 +268,7 @@ namespace RRSSR
                 linesUsed++;
             }
 
-            return linesUsed - 1;
+            return linesUsed;
         }
 
         // Stjålet fra StackOverflow
