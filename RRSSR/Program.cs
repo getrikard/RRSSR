@@ -183,6 +183,11 @@ namespace RRSSR
         {
             Console.ResetColor();
             Console.Clear();
+            if (exitCode != 0)
+            {
+                Console.WriteLine("Press Enter to continue...");
+                Console.ReadLine();
+            }
             Environment.Exit(exitCode);
         }
 
