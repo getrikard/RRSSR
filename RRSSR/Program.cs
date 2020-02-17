@@ -31,12 +31,9 @@ namespace RRSSR
                 return;
             }
 
-            Console.Title = "RRSSR";
-            Console.BackgroundColor = Settings.BgColor;
-            Console.ForegroundColor = Settings.FgColor;
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.Clear();
+            SetupConsole();
 
+            // 
             if (Settings.Urls.Count == 0)
             {
                 if (args.Length < 1)
@@ -57,7 +54,6 @@ namespace RRSSR
             }
 
             // Setup
-            Console.Clear();
             var selectedFeed = 0;
             RssFeed feed = null;
             try
@@ -172,6 +168,15 @@ namespace RRSSR
             }
         }
 
+        private static void SetupConsole()
+        {
+            Console.Title = "RRSSR";
+            Console.BackgroundColor = Settings.BgColor;
+            Console.ForegroundColor = Settings.FgColor;
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.Clear();
+        }
+
         private static void Usage()
         {
             Console.WriteLine("Usage:\n");
@@ -283,33 +288,6 @@ namespace RRSSR
                 buffer.Add(s.Substring(offset, size));
                 offset += size;
             }
-        }
-
-        private static void DrawBorder()
-        {
-            int w = Console.WindowWidth;
-            int h = Console.WindowHeight;
-
-            Console.BackgroundColor = Settings.FgColor;
-
-            for (int left = 0; left < w; left++)
-            {
-                Console.SetCursorPosition(left, 0);
-                Console.Write(' ');
-                Console.SetCursorPosition(left, h - 1);
-                Console.Write(' ');
-            }
-
-            for (int top = 0; top < h; top++)
-            {
-                Console.SetCursorPosition(0, top);
-                Console.Write("  ");
-                Console.SetCursorPosition(w - 2, top);
-                Console.Write("  ");
-            }
-
-            Console.SetCursorPosition(0, 0);
-            Console.BackgroundColor = Settings.BgColor;
         }
 
         private static RssFeed GetRssItems(string url, int amount)
