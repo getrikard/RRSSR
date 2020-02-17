@@ -18,7 +18,7 @@ namespace RRSSR
             if (args.Length > 0 && args[0].Trim() == "create_config")
             {
                 Settings.CreateFile(settingsFilename);
-                Environment.Exit(0);
+                Exit(0);
             }
 
             if (args.Length > 1) settingsFilename = args[1];
@@ -41,8 +41,6 @@ namespace RRSSR
             {
                 if (args.Length < 1)
                 {
-                    //Usage();
-                    //Environment.Exit(0);
                     Console.SetCursorPosition(Settings.PaddingLeft, Settings.PaddingTop);
                     Console.CursorVisible = true;
                     Console.Write("RSS URL > ");
@@ -183,8 +181,7 @@ namespace RRSSR
 
         private static void Exit(int exitCode)
         {
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ResetColor();
             Console.Clear();
             Environment.Exit(exitCode);
         }
