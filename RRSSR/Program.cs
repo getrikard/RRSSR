@@ -9,7 +9,7 @@ using System.Xml;
 
 namespace RRSSR
 {
-    class Program
+    internal class Program
     {
         private static void Main(string[] args)
         {

@@ -2,7 +2,7 @@
 
 namespace RRSSR
 {
-    class Screen
+    internal class Screen
     {
         private static void DrawBorder()
         {

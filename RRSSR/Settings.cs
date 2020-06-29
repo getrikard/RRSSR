@@ -10,8 +10,8 @@ namespace RRSSR
         internal static List<string> Urls { get; private set; } = new List<string>();
         internal static int PaddingTop { get; private set; } = 2;
         internal static int PaddingLeft { get; private set; } = 4;
-        internal static ConsoleColor FgColor { get; private set; } = ConsoleColor.Black;
-        internal static ConsoleColor BgColor { get; private set; } = ConsoleColor.White;
+        internal static ConsoleColor FgColor { get; private set; } = ConsoleColor.White;
+        internal static ConsoleColor BgColor { get; private set; } = ConsoleColor.Black;
         internal static int ItemsToGet { get; private set; } = 15;
 
         internal static int ReadFile(string filename)
@@ -26,7 +26,7 @@ namespace RRSSR
             {
                 lineNumber++;
 
-                if (line.StartsWith("#")) continue;
+                if (line.Trim().StartsWith("#")) continue;
 
                 var settingLine = line.Split('=').ToList().Select(item => item.Trim()).ToArray();
 
@@ -78,7 +78,7 @@ namespace RRSSR
 
         internal new static string ToString()
         {
-            string txt = "";
+            var txt = "";
             foreach (var url in Urls)
             {
                 txt += $"rss_url = {url}\n";
