@@ -49,9 +49,9 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RssFeed.cs" />
-    <Compile Include="RssItem.cs" />
-    <Compile Include="Screen.cs" />
+    <Compile Include="Model\RssFeed.cs" />
+    <Compile Include="Model\RssItem.cs" />
+    <Compile Include="Model\Screen.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -60,5 +60,6 @@
   <ItemGroup>
     <Content Include="rikard.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

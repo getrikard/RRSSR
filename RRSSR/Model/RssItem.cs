@@ -1,4 +1,4 @@
-﻿namespace RRSSR
+﻿namespace RRSSR.Model
 {
     class RssItem
     {

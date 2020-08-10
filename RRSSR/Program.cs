@@ -7,10 +7,14 @@ using System.ServiceModel.Syndication;
 using System.Text;
 using System.Xml;
 
+using RRSSR.Model;
+
 namespace RRSSR
 {
     internal class Program
     {
+        private static int selectedItem;
+
         private static void Main(string[] args)
         {
             var settingsFilename = "rrssr.conf";
@@ -66,7 +70,7 @@ namespace RRSSR
                 Exit(1);
             }
 
-            var selected = 0;
+            selectedItem = 0;
             ConsoleKey keyPressed;
             Console.CursorVisible = false;
             RssItem item;
@@ -81,42 +85,42 @@ namespace RRSSR
             {
                 if (doPrintMenu)
                 {
-                    PrintMenu(feed, selected, refreshFrom, refreshTo, doClearMenu);
+                    PrintMenu(feed, selectedItem, refreshFrom, refreshTo, doClearMenu);
                 }
                 keyPressed = Console.ReadKey(true).Key;
-                item = feed.Items[selected];
+                item = feed.Items[selectedItem];
 
                 switch (keyPressed)
                 {
                     case ConsoleKey.DownArrow:
                     case ConsoleKey.PageDown:
                     case ConsoleKey.J:
-                        refreshFrom = selected;
-                        selected = selected + 1 < feed.Items.Length ? selected + 1 : feed.Items.Length - 1;
-                        refreshTo = selected + 1;
+                        refreshFrom = selectedItem;
+                        selectedItem = selectedItem + 1 < feed.Items.Length ? selectedItem + 1 : feed.Items.Length - 1;
+                        refreshTo = selectedItem + 1;
                         doClearMenu = false;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.UpArrow:
                     case ConsoleKey.PageUp:
                     case ConsoleKey.K:
-                        refreshTo = selected + 1;
-                        selected = selected - 1 >= 0 ? selected - 1 : 0;
-                        refreshFrom = selected;
+                        refreshTo = selectedItem + 1;
+                        selectedItem = selectedItem - 1 >= 0 ? selectedItem - 1 : 0;
+                        refreshFrom = selectedItem;
                         doClearMenu = false;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.Home:
                         refreshFrom = 0;
                         refreshTo = feed.Items.Length;
-                        selected = 0;
+                        selectedItem = 0;
                         doClearMenu = false;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.End:
                         refreshFrom = 0;
                         refreshTo = feed.Items.Length;
-                        selected = feed.Items.Length - 1;
+                        selectedItem = feed.Items.Length - 1;
                         doClearMenu = false;
                         doPrintMenu = true;
                         break;
@@ -232,7 +236,9 @@ namespace RRSSR
         private static void PrintItem(RssItem item)
         {
             Console.Clear();
-            PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop, item.Summary);
+            var lines = PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop,
+                item.Title);
+            PrintAtPosition(Settings.PaddingLeft, Settings.PaddingTop + lines + 1, item.Summary);
             ConsoleKey keyPressed;
             while (true)
             {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RRSSR
+namespace RRSSR.Model
 {
     internal class Screen
     {
