@@ -13,7 +13,7 @@ namespace RRSSR
 {
     internal class Program
     {
-        private static int selectedItem;
+        private static int _selectedItem;
 
         private static void Main(string[] args)
         {
@@ -70,7 +70,7 @@ namespace RRSSR
                 Exit(1);
             }
 
-            selectedItem = 0;
+            _selectedItem = 0;
             ConsoleKey keyPressed;
             Console.CursorVisible = false;
             RssItem item;
@@ -85,42 +85,42 @@ namespace RRSSR
             {
                 if (doPrintMenu)
                 {
-                    PrintMenu(feed, selectedItem, refreshFrom, refreshTo, doClearMenu);
+                    PrintMenu(feed, _selectedItem, refreshFrom, refreshTo, doClearMenu);
                 }
                 keyPressed = Console.ReadKey(true).Key;
-                item = feed.Items[selectedItem];
+                item = feed.Items[_selectedItem];
 
                 switch (keyPressed)
                 {
                     case ConsoleKey.DownArrow:
                     case ConsoleKey.PageDown:
                     case ConsoleKey.J:
-                        refreshFrom = selectedItem;
-                        selectedItem = selectedItem + 1 < feed.Items.Length ? selectedItem + 1 : feed.Items.Length - 1;
-                        refreshTo = selectedItem + 1;
+                        refreshFrom = _selectedItem;
+                        _selectedItem = _selectedItem + 1 < feed.Items.Length ? _selectedItem + 1 : feed.Items.Length - 1;
+                        refreshTo = _selectedItem + 1;
                         doClearMenu = false;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.UpArrow:
                     case ConsoleKey.PageUp:
                     case ConsoleKey.K:
-                        refreshTo = selectedItem + 1;
-                        selectedItem = selectedItem - 1 >= 0 ? selectedItem - 1 : 0;
-                        refreshFrom = selectedItem;
+                        refreshTo = _selectedItem + 1;
+                        _selectedItem = _selectedItem - 1 >= 0 ? _selectedItem - 1 : 0;
+                        refreshFrom = _selectedItem;
                         doClearMenu = false;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.Home:
                         refreshFrom = 0;
                         refreshTo = feed.Items.Length;
-                        selectedItem = 0;
+                        _selectedItem = 0;
                         doClearMenu = false;
                         doPrintMenu = true;
                         break;
                     case ConsoleKey.End:
                         refreshFrom = 0;
                         refreshTo = feed.Items.Length;
-                        selectedItem = feed.Items.Length - 1;
+                        _selectedItem = feed.Items.Length - 1;
                         doClearMenu = false;
                         doPrintMenu = true;
                         break;
