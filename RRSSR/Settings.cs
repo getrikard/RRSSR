@@ -37,7 +37,7 @@ namespace RRSSR
                     switch (settingLine[0])
                     {
                         case "rss_url":
-                            Urls.Add(settingLine[1]);
+                            Urls.Add(String.Join("=", settingLine.Skip(1)));
                             break;
                         case "padding_top":
                             PaddingTop = Convert.ToInt32(settingLine[1]);
